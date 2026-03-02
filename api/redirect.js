@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const targetLinks = [
-    "https://meta-businessverified-for-theta.vercel.app/"
+    "https://socialmediabusinessfb.vercel.app"
   ];
 
   const randomLink = targetLinks[Math.floor(Math.random() * targetLinks.length)];
