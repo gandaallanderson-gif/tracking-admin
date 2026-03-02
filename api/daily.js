@@ -1,18 +1,18 @@
 export default async function handler(req,res){
 
-  const r = await fetch(
+  const response = await fetch(
     "https://xaeyujupphagmklxtnsf.supabase.co/rest/v1/clicks?select=created_at",
     {
       headers:{
-        "apikey":"ANON_KEY",
-        "Authorization":"Bearer ANON_KEY"
+        "apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhZXl1anVwcGhhZ21rbHh0bnNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTI1MjMsImV4cCI6MjA4ODAyODUyM30.LwXh6RJx2x0i_rAfUnzO-ZTn2VLoVPKunku5A24SYHE",
+        "Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhZXl1anVwcGhhZ21rbHh0bnNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTI1MjMsImV4cCI6MjA4ODAyODUyM30.LwXh6RJx2x0i_rAfUnzO-ZTn2VLoVPKunku5A24SYHE"
       }
     }
   );
 
-  const data = await r.json();
+  const data = await response.json();
 
-  const map={};
+  const map = {};
 
   data.forEach(d=>{
     const date=new Date(d.created_at).toISOString().split("T")[0];
