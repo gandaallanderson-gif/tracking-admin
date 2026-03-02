@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tracking Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background:#111;color:white;padding:30px;font-family:Arial">
+
+<h1>Tracking Dashboard</h1>
+
+<h2>Total: <span id="total"></span></h2>
+<h2>Today: <span id="today"></span></h2>
+
+<h2>Top Countries</h2>
+<canvas id="chart"></canvas>
+
+<script>
+fetch('/api/stats')
+.then(res=>res.json())
+.then(data=>{
+  total.innerText=data.total;
+  today.innerText=data.today;
+});
+
+fetch('/api/countries')
+.then(res=>res.json())
+.then(data=>{
+  new Chart(document.getElementById('chart'),{
+    type:'bar',
+    data:{
+      labels:data.map(d=>d[0]),
+      datasets:[{
+        data:data.map(d=>d[1]),
+        backgroundColor:'#3b82f6'
+      }]
+    }
+  });
+});
+</script>
+
+</body>
+</html>
