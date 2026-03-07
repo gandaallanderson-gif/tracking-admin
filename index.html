@@ -83,6 +83,90 @@
       margin-bottom:20px;
       font-weight:500;
     }
+
+    /* Style cho bảng quốc gia */
+    .countries-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .countries-table th {
+      text-align: left;
+      padding: 12px;
+      background: rgba(124, 58, 237, 0.3);
+      color: white;
+      font-weight: 600;
+    }
+
+    .countries-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .countries-table tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .rank-badge {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      background: rgba(124, 58, 237, 0.3);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      font-weight: 600;
+    }
+
+    .country-flag {
+      font-size: 20px;
+      margin-right: 10px;
+    }
+
+    .count-bar {
+      height: 8px;
+      background: rgba(124, 58, 237, 0.3);
+      border-radius: 4px;
+      margin-top: 5px;
+      position: relative;
+    }
+
+    .count-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #9333ea);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .total-countries {
+      margin-bottom: 15px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .search-box {
+      margin-bottom: 20px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+    }
+
+    .search-box input::placeholder {
+      color: #94a3b8;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #7c3aed;
+    }
   </style>
 </head>
 <body>
@@ -107,50 +191,142 @@
       </div>
       <div class="value" id="today">0</div>
     </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <div>Countries</div>
+        <div class="icon purple">🌍</div>
+      </div>
+      <div class="value" id="totalCountries">0</div>
+    </div>
   </div>
 
   <div class="chart-box">
-    <h3>🌍 Top Countries</h3>
-    <canvas id="countryChart"></canvas>
-  </div>
-
-  <div class="chart-box">
-    <h3>📊 Daily Growth</h3>
+    <h3>🌍 Daily Growth</h3>
     <canvas id="dailyChart"></canvas>
+  </div>
+
+  <div class="chart-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3>🌍 All Countries</h3>
+      <div class="total-countries" id="countryCount">Total: 0 countries</div>
+    </div>
+    
+    <div class="search-box">
+      <input type="text" id="countrySearch" placeholder="🔍 Search country..." onkeyup="filterCountries()">
+    </div>
+    
+    <table class="countries-table" id="countriesTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Country</th>
+          <th>Clicks</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody id="countriesBody">
+        <!-- Data will be inserted here -->
+      </tbody>
+    </table>
   </div>
 
 </div>
 
 <script>
+let allCountriesData = [];
+let totalClicks = 0;
+
 async function loadStats(){
   const res = await fetch('/api/stats');
   const data = await res.json();
   document.getElementById('total').innerText = data.total;
   document.getElementById('today').innerText = data.today;
+  totalClicks = data.total;
 }
 
-async function loadCountries(){
+async function loadAllCountries(){
   const res = await fetch('/api/countries');
   const data = await res.json();
+  allCountriesData = data;
+  
+  document.getElementById('totalCountries').innerText = data.length;
+  document.getElementById('countryCount').innerText = `Total: ${data.length} countries`;
+  
+  displayCountries(data);
+}
 
-  new Chart(document.getElementById('countryChart'),{
-    type:'bar',
-    data:{
-      labels:data.map(d=>d[0]),
-      datasets:[{
-        data:data.map(d=>d[1]),
-        backgroundColor:'#7c3aed',
-        borderRadius:10
-      }]
-    },
-    options:{
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"white"}},
-        y:{ticks:{color:"white"}}
-      }
-    }
+function displayCountries(countries) {
+  const tbody = document.getElementById('countriesBody');
+  tbody.innerHTML = '';
+  
+  let maxClicks = countries.length > 0 ? countries[0][1] : 0;
+  
+  countries.forEach((country, index) => {
+    const countryName = country[0];
+    const clicks = country[1];
+    const percentage = ((clicks / totalClicks) * 100).toFixed(1);
+    
+    // Flag emoji (simplified - you can use a library for accurate flags)
+    const flagEmoji = getFlagEmoji(countryName);
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><span class="rank-badge">${index + 1}</span></td>
+      <td>
+        <span style="display: flex; align-items: center;">
+          <span class="country-flag">${flagEmoji}</span>
+          <span>${countryName}</span>
+        </span>
+      </td>
+      <td><strong>${clicks.toLocaleString()}</strong></td>
+      <td style="width: 30%;">
+        ${percentage}%
+        <div class="count-bar">
+          <div class="count-bar-fill" style="width: ${(clicks / maxClicks) * 100}%;"></div>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(row);
   });
+}
+
+// Simple function to get flag emoji (you might want to use a proper library)
+function getFlagEmoji(countryName) {
+  const flagMap = {
+    'Vietnam': '🇻🇳',
+    'United States': '🇺🇸',
+    'United Kingdom': '🇬🇧',
+    'Japan': '🇯🇵',
+    'South Korea': '🇰🇷',
+    'China': '🇨🇳',
+    'France': '🇫🇷',
+    'Germany': '🇩🇪',
+    'Italy': '🇮🇹',
+    'Spain': '🇪🇸',
+    'Russia': '🇷🇺',
+    'Brazil': '🇧🇷',
+    'India': '🇮🇳',
+    'Canada': '🇨🇦',
+    'Australia': '🇦🇺',
+    'Unknown': '🌍'
+  };
+  return flagMap[countryName] || '🌍';
+}
+
+function filterCountries() {
+  const searchText = document.getElementById('countrySearch').value.toLowerCase();
+  
+  if (!searchText) {
+    displayCountries(allCountriesData);
+    return;
+  }
+  
+  const filtered = allCountriesData.filter(country => 
+    country[0].toLowerCase().includes(searchText)
+  );
+  
+  displayCountries(filtered);
 }
 
 async function loadDaily(){
@@ -162,6 +338,7 @@ async function loadDaily(){
     data:{
       labels:data.map(d=>d.date),
       datasets:[{
+        label: 'Clicks',
         data:data.map(d=>d.count),
         borderColor:'#10b981',
         backgroundColor:'rgba(16,185,129,0.3)',
@@ -170,17 +347,27 @@ async function loadDaily(){
       }]
     },
     options:{
-      plugins:{legend:{display:false}},
+      plugins:{
+        legend:{display:false}
+      },
       scales:{
-        x:{ticks:{color:"white"}},
-        y:{ticks:{color:"white"}}
+        x:{
+          ticks:{color:"white"},
+          grid:{color:'rgba(255,255,255,0.1)'}
+        },
+        y:{
+          ticks:{color:"white"},
+          grid:{color:'rgba(255,255,255,0.1)'},
+          beginAtZero:true
+        }
       }
     }
   });
 }
 
+// Load all data
 loadStats();
-loadCountries();
+loadAllCountries();
 loadDaily();
 </script>
 
