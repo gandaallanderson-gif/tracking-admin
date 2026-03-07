@@ -1,238 +1,309 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
   try {
-    const { data, error } = await supabase
-      .from('clicks')
-      .select('country');
+    // Fetch dữ liệu từ Supabase
+    const response = await fetch(
+      "https://xaeyujupphagmklxtnsf.supabase.co/rest/v1/clicks?select=country",
+      {
+        headers: {
+          "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhZXl1anVwcGhhZ21rbHh0bnNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTI1MjMsImV4cCI6MjA4ODAyODUyM30.LwXh6RJx2x0i_rAfUnzO-ZTn2VLoVPKunku5A24SYHE",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhhZXl1anVwcGhhZ21rbHh0bnNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTI1MjMsImV4cCI6MjA4ODAyODUyM30.LwXh6RJx2x0i_rAfUnzO-ZTn2VLoVPKunku5A24SYHE"
+        }
+      }
+    );
 
-    if (error) throw error;
+    if (!response.ok) {
+      return res.status(500).json({ error: 'Failed to fetch data from Supabase' });
+    }
 
-    // Map đầy đủ tất cả mã quốc gia sang tên đầy đủ
+    const data = await response.json();
+
+    // Map đầy đủ tất cả mã quốc gia 2 ký tự sang tên tiếng Anh
     const countryNames = {
-      // Châu Á
-      'VN': 'Vietnam',
+      // Châu Á (Asia)
+      'AF': 'Afghanistan',
+      'AM': 'Armenia',
+      'AZ': 'Azerbaijan',
+      'BH': 'Bahrain',
+      'BD': 'Bangladesh',
+      'BT': 'Bhutan',
+      'BN': 'Brunei',
+      'KH': 'Cambodia',
       'CN': 'China',
-      'JP': 'Japan',
-      'KR': 'South Korea',
+      'CY': 'Cyprus',
+      'GE': 'Georgia',
       'IN': 'India',
       'ID': 'Indonesia',
-      'MY': 'Malaysia',
-      'TH': 'Thailand',
-      'SG': 'Singapore',
-      'PH': 'Philippines',
-      'MM': 'Myanmar',
-      'KH': 'Cambodia',
-      'LA': 'Laos',
-      'BN': 'Brunei',
-      'TL': 'East Timor',
-      'NP': 'Nepal',
-      'BD': 'Bangladesh',
-      'PK': 'Pakistan',
-      'LK': 'Sri Lanka',
-      'BT': 'Bhutan',
-      'MV': 'Maldives',
-      'AF': 'Afghanistan',
       'IR': 'Iran',
       'IQ': 'Iraq',
-      'SA': 'Saudi Arabia',
-      'YE': 'Yemen',
-      'SY': 'Syria',
-      'JO': 'Jordan',
       'IL': 'Israel',
-      'LB': 'Lebanon',
-      'CY': 'Cyprus',
-      'TR': 'Turkey',
-      'AZ': 'Azerbaijan',
-      'GE': 'Georgia',
-      'AM': 'Armenia',
-      'RU': 'Russia',
-      'UZ': 'Uzbekistan',
+      'JP': 'Japan',
+      'JO': 'Jordan',
       'KZ': 'Kazakhstan',
-      'TM': 'Turkmenistan',
+      'KW': 'Kuwait',
       'KG': 'Kyrgyzstan',
-      'TJ': 'Tajikistan',
+      'LA': 'Laos',
+      'LB': 'Lebanon',
+      'MY': 'Malaysia',
+      'MV': 'Maldives',
       'MN': 'Mongolia',
+      'MM': 'Myanmar',
+      'NP': 'Nepal',
+      'KP': 'North Korea',
+      'OM': 'Oman',
+      'PK': 'Pakistan',
+      'PS': 'Palestine',
+      'PH': 'Philippines',
+      'QA': 'Qatar',
+      'SA': 'Saudi Arabia',
+      'SG': 'Singapore',
+      'KR': 'South Korea',
+      'LK': 'Sri Lanka',
+      'SY': 'Syria',
       'TW': 'Taiwan',
-      'HK': 'Hong Kong',
-      'MO': 'Macau',
-      
-      // Châu Âu
-      'GB': 'United Kingdom',
-      'DE': 'Germany',
-      'FR': 'France',
-      'IT': 'Italy',
-      'ES': 'Spain',
-      'PT': 'Portugal',
-      'NL': 'Netherlands',
-      'BE': 'Belgium',
-      'LU': 'Luxembourg',
-      'CH': 'Switzerland',
+      'TJ': 'Tajikistan',
+      'TH': 'Thailand',
+      'TL': 'Timor-Leste',
+      'TR': 'Turkey',
+      'TM': 'Turkmenistan',
+      'AE': 'United Arab Emirates',
+      'UZ': 'Uzbekistan',
+      'VN': 'Vietnam',
+      'YE': 'Yemen',
+
+      // Châu Âu (Europe)
+      'AL': 'Albania',
+      'AD': 'Andorra',
       'AT': 'Austria',
+      'BY': 'Belarus',
+      'BE': 'Belgium',
+      'BA': 'Bosnia and Herzegovina',
+      'BG': 'Bulgaria',
+      'HR': 'Croatia',
+      'CZ': 'Czech Republic',
       'DK': 'Denmark',
-      'SE': 'Sweden',
-      'NO': 'Norway',
+      'EE': 'Estonia',
       'FI': 'Finland',
+      'FR': 'France',
+      'DE': 'Germany',
+      'GR': 'Greece',
+      'HU': 'Hungary',
       'IS': 'Iceland',
       'IE': 'Ireland',
-      'PL': 'Poland',
-      'CZ': 'Czech Republic',
-      'SK': 'Slovakia',
-      'HU': 'Hungary',
-      'RO': 'Romania',
-      'BG': 'Bulgaria',
-      'GR': 'Greece',
-      'HR': 'Croatia',
-      'SI': 'Slovenia',
-      'BA': 'Bosnia and Herzegovina',
-      'RS': 'Serbia',
-      'ME': 'Montenegro',
-      'MK': 'North Macedonia',
-      'AL': 'Albania',
+      'IT': 'Italy',
       'XK': 'Kosovo',
-      'EE': 'Estonia',
       'LV': 'Latvia',
+      'LI': 'Liechtenstein',
       'LT': 'Lithuania',
-      'BY': 'Belarus',
-      'UA': 'Ukraine',
+      'LU': 'Luxembourg',
+      'MT': 'Malta',
       'MD': 'Moldova',
-      
-      // Châu Mỹ
-      'US': 'United States',
-      'CA': 'Canada',
-      'MX': 'Mexico',
-      'BR': 'Brazil',
+      'MC': 'Monaco',
+      'ME': 'Montenegro',
+      'NL': 'Netherlands',
+      'MK': 'North Macedonia',
+      'NO': 'Norway',
+      'PL': 'Poland',
+      'PT': 'Portugal',
+      'RO': 'Romania',
+      'RU': 'Russia',
+      'SM': 'San Marino',
+      'RS': 'Serbia',
+      'SK': 'Slovakia',
+      'SI': 'Slovenia',
+      'ES': 'Spain',
+      'SE': 'Sweden',
+      'CH': 'Switzerland',
+      'UA': 'Ukraine',
+      'GB': 'United Kingdom',
+      'VA': 'Vatican City',
+
+      // Châu Mỹ (Americas)
+      'AI': 'Anguilla',
+      'AG': 'Antigua and Barbuda',
       'AR': 'Argentina',
+      'AW': 'Aruba',
+      'BS': 'Bahamas',
+      'BB': 'Barbados',
+      'BZ': 'Belize',
+      'BM': 'Bermuda',
+      'BO': 'Bolivia',
+      'BQ': 'Bonaire',
+      'BR': 'Brazil',
+      'VG': 'British Virgin Islands',
+      'CA': 'Canada',
+      'KY': 'Cayman Islands',
       'CL': 'Chile',
       'CO': 'Colombia',
-      'PE': 'Peru',
-      'VE': 'Venezuela',
-      'EC': 'Ecuador',
-      'BO': 'Bolivia',
-      'PY': 'Paraguay',
-      'UY': 'Uruguay',
-      'GY': 'Guyana',
-      'SR': 'Suriname',
-      'GF': 'French Guiana',
       'CR': 'Costa Rica',
-      'PA': 'Panama',
-      'NI': 'Nicaragua',
-      'HN': 'Honduras',
-      'SV': 'El Salvador',
-      'GT': 'Guatemala',
-      'BZ': 'Belize',
       'CU': 'Cuba',
-      'JM': 'Jamaica',
-      'HT': 'Haiti',
+      'CW': 'Curaçao',
+      'DM': 'Dominica',
       'DO': 'Dominican Republic',
+      'EC': 'Ecuador',
+      'SV': 'El Salvador',
+      'FK': 'Falkland Islands',
+      'GF': 'French Guiana',
+      'GL': 'Greenland',
+      'GD': 'Grenada',
+      'GP': 'Guadeloupe',
+      'GT': 'Guatemala',
+      'GY': 'Guyana',
+      'HT': 'Haiti',
+      'HN': 'Honduras',
+      'JM': 'Jamaica',
+      'MQ': 'Martinique',
+      'MX': 'Mexico',
+      'MS': 'Montserrat',
+      'NI': 'Nicaragua',
+      'PA': 'Panama',
+      'PY': 'Paraguay',
+      'PE': 'Peru',
       'PR': 'Puerto Rico',
-      'BS': 'Bahamas',
+      'BL': 'Saint Barthélemy',
+      'KN': 'Saint Kitts and Nevis',
+      'LC': 'Saint Lucia',
+      'MF': 'Saint Martin',
+      'PM': 'Saint Pierre and Miquelon',
+      'VC': 'Saint Vincent and the Grenadines',
+      'SX': 'Sint Maarten',
+      'SR': 'Suriname',
       'TT': 'Trinidad and Tobago',
-      'BB': 'Barbados',
-      
-      // Châu Phi
-      'ZA': 'South Africa',
-      'NG': 'Nigeria',
-      'EG': 'Egypt',
-      'MA': 'Morocco',
+      'TC': 'Turks and Caicos Islands',
+      'US': 'United States',
+      'UY': 'Uruguay',
+      'VE': 'Venezuela',
+      'VI': 'U.S. Virgin Islands',
+
+      // Châu Phi (Africa)
       'DZ': 'Algeria',
-      'TN': 'Tunisia',
-      'LY': 'Libya',
-      'SD': 'Sudan',
-      'SS': 'South Sudan',
-      'ET': 'Ethiopia',
-      'KE': 'Kenya',
-      'TZ': 'Tanzania',
-      'UG': 'Uganda',
-      'RW': 'Rwanda',
+      'AO': 'Angola',
+      'BJ': 'Benin',
+      'BW': 'Botswana',
+      'BF': 'Burkina Faso',
       'BI': 'Burundi',
-      'CD': 'DR Congo',
-      'CG': 'Republic of Congo',
-      'GA': 'Gabon',
+      'CV': 'Cabo Verde',
       'CM': 'Cameroon',
       'CF': 'Central African Republic',
       'TD': 'Chad',
-      'NE': 'Niger',
+      'KM': 'Comoros',
+      'CG': 'Congo',
+      'CD': 'DR Congo',
+      'DJ': 'Djibouti',
+      'EG': 'Egypt',
+      'GQ': 'Equatorial Guinea',
+      'ER': 'Eritrea',
+      'SZ': 'Eswatini',
+      'ET': 'Ethiopia',
+      'GA': 'Gabon',
+      'GM': 'Gambia',
+      'GH': 'Ghana',
+      'GN': 'Guinea',
+      'GW': 'Guinea-Bissau',
+      'CI': 'Ivory Coast',
+      'KE': 'Kenya',
+      'LS': 'Lesotho',
+      'LR': 'Liberia',
+      'LY': 'Libya',
+      'MG': 'Madagascar',
+      'MW': 'Malawi',
       'ML': 'Mali',
       'MR': 'Mauritania',
-      'SN': 'Senegal',
-      'GM': 'Gambia',
-      'GW': 'Guinea-Bissau',
-      'GN': 'Guinea',
-      'SL': 'Sierra Leone',
-      'LR': 'Liberia',
-      'CI': 'Ivory Coast',
-      'GH': 'Ghana',
-      'BF': 'Burkina Faso',
-      'BJ': 'Benin',
-      'TG': 'Togo',
-      'AO': 'Angola',
-      'NA': 'Namibia',
-      'BW': 'Botswana',
-      'ZW': 'Zimbabwe',
-      'ZM': 'Zambia',
-      'MW': 'Malawi',
-      'MZ': 'Mozambique',
-      'MG': 'Madagascar',
       'MU': 'Mauritius',
-      'KM': 'Comoros',
-      'CV': 'Cape Verde',
+      'MA': 'Morocco',
+      'MZ': 'Mozambique',
+      'NA': 'Namibia',
+      'NE': 'Niger',
+      'NG': 'Nigeria',
+      'RW': 'Rwanda',
       'ST': 'Sao Tome and Principe',
-      'GQ': 'Equatorial Guinea',
-      
-      // Châu Đại Dương
+      'SN': 'Senegal',
+      'SC': 'Seychelles',
+      'SL': 'Sierra Leone',
+      'SO': 'Somalia',
+      'ZA': 'South Africa',
+      'SS': 'South Sudan',
+      'SD': 'Sudan',
+      'TZ': 'Tanzania',
+      'TG': 'Togo',
+      'TN': 'Tunisia',
+      'UG': 'Uganda',
+      'EH': 'Western Sahara',
+      'ZM': 'Zambia',
+      'ZW': 'Zimbabwe',
+
+      // Châu Đại Dương (Oceania)
+      'AS': 'American Samoa',
       'AU': 'Australia',
-      'NZ': 'New Zealand',
-      'PG': 'Papua New Guinea',
+      'CK': 'Cook Islands',
       'FJ': 'Fiji',
-      'SB': 'Solomon Islands',
-      'VU': 'Vanuatu',
-      'NC': 'New Caledonia',
       'PF': 'French Polynesia',
-      'WS': 'Samoa',
-      'TO': 'Tonga',
+      'GU': 'Guam',
       'KI': 'Kiribati',
       'MH': 'Marshall Islands',
       'FM': 'Micronesia',
-      'PW': 'Palau',
-      'TV': 'Tuvalu',
       'NR': 'Nauru',
-      
-      // Trung Đông
-      'AE': 'United Arab Emirates',
-      'QA': 'Qatar',
-      'KW': 'Kuwait',
-      'BH': 'Bahrain',
-      'OM': 'Oman',
-      
+      'NC': 'New Caledonia',
+      'NZ': 'New Zealand',
+      'NU': 'Niue',
+      'NF': 'Norfolk Island',
+      'MP': 'Northern Mariana Islands',
+      'PW': 'Palau',
+      'PG': 'Papua New Guinea',
+      'PN': 'Pitcairn Islands',
+      'WS': 'Samoa',
+      'SB': 'Solomon Islands',
+      'TK': 'Tokelau',
+      'TO': 'Tonga',
+      'TV': 'Tuvalu',
+      'VU': 'Vanuatu',
+      'WF': 'Wallis and Futuna',
+
       // Các trường hợp đặc biệt
       'Unknown': 'Unknown',
       'null': 'Unknown',
-      'undefined': 'Unknown'
+      'undefined': 'Unknown',
+      '': 'Unknown'
     };
 
-    const map = {};
-    
-    data.forEach(d => {
-      // Lấy country code hoặc default
-      const countryCode = d.country || 'Unknown';
-      // Chuyển sang tên đầy đủ, nếu không có thì giữ nguyên code
-      const fullCountryName = countryNames[countryCode] || countryCode;
-      map[fullCountryName] = (map[fullCountryName] || 0) + 1;
+    // Đếm số lượng click theo quốc gia
+    const countryCount = {};
+
+    data.forEach(item => {
+      let countryCode = item.country || 'Unknown';
+      
+      // Xử lý nếu countryCode là null/undefined
+      if (!countryCode || countryCode === 'null' || countryCode === 'undefined') {
+        countryCode = 'Unknown';
+      }
+      
+      // Chuyển mã quốc gia sang tên đầy đủ
+      let countryName = countryNames[countryCode];
+      
+      // Nếu không tìm thấy trong map, giữ nguyên giá trị gốc
+      if (!countryName) {
+        countryName = countryCode;
+      }
+      
+      // Đếm
+      countryCount[countryName] = (countryCount[countryName] || 0) + 1;
     });
 
     // Chuyển object thành array và sắp xếp theo số lượng giảm dần
-    // NHƯNG KHÔNG GIỚI HẠN - hiển thị TẤT CẢ
-    const allCountries = Object.entries(map)
-      .sort((a, b) => b[1] - a[1]); // Sắp xếp từ cao xuống thấp
+    const sortedCountries = Object.entries(countryCount)
+      .sort((a, b) => b[1] - a[1]);
 
-    res.status(200).json(allCountries);
+    // Log để debug
+    console.log('Total countries:', sortedCountries.length);
+    console.log('Sample data:', sortedCountries.slice(0, 3));
+
+    // Trả về kết quả
+    res.status(200).json(sortedCountries);
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Countries API Error:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error.message 
+    });
   }
 }
