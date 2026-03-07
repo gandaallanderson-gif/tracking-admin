@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
   try {
-
     const response = await fetch(
       "https://xaeyujupphagmklxtnsf.supabase.co/rest/v1/clicks?select=created_at",
       {
@@ -12,8 +11,7 @@ export default async function handler(req, res) {
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      return res.status(500).json({ error: errorText });
+      return res.status(500).json({ error: 'Failed to fetch' });
     }
 
     const data = await response.json();
@@ -24,7 +22,6 @@ export default async function handler(req, res) {
       const date = new Date(d.created_at)
         .toISOString()
         .split("T")[0];
-
       map[date] = (map[date] || 0) + 1;
     });
 
@@ -33,7 +30,7 @@ export default async function handler(req, res) {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     res.status(200).json(result);
-
+    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
